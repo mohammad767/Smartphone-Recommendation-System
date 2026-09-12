@@ -1,0 +1,39 @@
+services:
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+
+    command: python manage.py runserver 0.0.0.0:8000
+
+    volumes:
+      - .:/app
+
+    ports:
+      - "8000:8000"
+
+    env_file:
+      - .env
+
+    depends_on:
+      - db
+
+
+  db:
+    image: postgres:16
+
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    environment:
+      POSTGRES_DB: smartphone_db
+      POSTGRES_USER: smartphone_user
+      POSTGRES_PASSWORD: smartphone_password
+
+    ports:
+      - "5432:5432"
+
+
+volumes:
+  postgres_data:

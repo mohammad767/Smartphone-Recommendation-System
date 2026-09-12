@@ -1,0 +1,77 @@
+# ======================
+# Django Core
+# ======================
+
+Django==5.1.7
+dotenv
+
+# ======================
+# REST API
+# ======================
+
+djangorestframework==3.15.2
+djangorestframework-simplejwt==5.3.1
+drf-spectacular==0.28.0
+django-filter==24.3
+
+
+# ======================
+# PostgreSQL
+# ======================
+
+psycopg2-binary==2.9.10
+
+
+# ======================
+# Environment
+# ======================
+
+python-dotenv==1.0.1
+
+
+# ======================
+# Background Tasks
+# ======================
+
+celery==5.4.0
+redis==5.2.1
+
+
+# ======================
+# Testing
+# ======================
+
+pytest==8.3.4
+pytest-django==4.9.0
+factory-boy==3.3.1
+
+
+# ======================
+# Code Quality
+# ======================
+
+black==25.1.0
+flake8==7.1.1
+
+
+# ======================
+# Data Processing
+# ======================
+
+numpy==2.2.1
+pandas==2.2.3
+
+
+# ======================
+# Machine Learning
+# ======================
+
+scikit-learn==1.6.1
+
+
+# ======================
+# Web Scraping / Data Collection
+# ======================
+
+requests==2.32.3
+beautifulsoup4==4.12.3
