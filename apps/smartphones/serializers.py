@@ -81,7 +81,7 @@ class SmartPhoneWriteSerializer(serializers.ModelSerializer):
 
 
 class SpecificationReadSerializer(serializers.ModelSerializer):
-    # smartphone = SmartPhoneReadSerializer()
+    smartphone = SmartPhoneReadSerializer()
 
     class Meta:
         model = SmartphoneSpecification
@@ -92,6 +92,7 @@ class SpecificationReadSerializer(serializers.ModelSerializer):
             "battery",
             "camera",
             "display_type",
+            "smartphone",
             "processor",
             "weight",
         ]
@@ -325,9 +326,31 @@ class UserPreferenceWriteSerializer(serializers.ModelSerializer):
         return value
     
     
+    
+    
+    
+class PhoneSpecificationReadSerializer(serializers.ModelSerializer):
+    
+
+    class Meta:
+        model = SmartphoneSpecification
+        fields = [
+            "id",
+            "ram",
+            "storage",
+            "battery",
+            "camera",
+            "display_type",
+            "processor",
+            "weight",
+        ]
+    
+    
+    
+    
 class SmartphoneDetailSerializer(serializers.ModelSerializer):
     brand = BrandSerializer()
-    specification = SpecificationReadSerializer()
+    specification = PhoneSpecificationReadSerializer()
 
     class Meta:
         model = Smartphone
