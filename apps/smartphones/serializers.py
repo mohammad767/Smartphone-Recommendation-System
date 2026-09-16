@@ -81,13 +81,12 @@ class SmartPhoneWriteSerializer(serializers.ModelSerializer):
 
 
 class SpecificationReadSerializer(serializers.ModelSerializer):
-    smartphone = SmartPhoneReadSerializer()
+    # smartphone = SmartPhoneReadSerializer()
 
     class Meta:
         model = SmartphoneSpecification
         fields = [
             "id",
-            "smartphone",
             "ram",
             "storage",
             "battery",
@@ -324,3 +323,20 @@ class UserPreferenceWriteSerializer(serializers.ModelSerializer):
             )
 
         return value
+    
+    
+class SmartphoneDetailSerializer(serializers.ModelSerializer):
+    brand = BrandSerializer()
+    specification = SpecificationReadSerializer()
+
+    class Meta:
+        model = Smartphone
+        fields = [
+            "id",
+            "name",
+            "brand",
+            "release_date",
+            "specification",
+            "created_at",
+            "updated_at",
+        ]
