@@ -4,6 +4,7 @@
 
 Django==5.1.7
 dotenv
+Pillow==11.1.0
 
 # ======================
 # REST API
