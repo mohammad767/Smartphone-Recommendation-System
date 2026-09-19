@@ -396,7 +396,7 @@ class UserPreferenceReadSerializer(serializers.ModelSerializer):
 
 
 class UserPreferenceWriteSerializer(serializers.ModelSerializer):
-
+    preferred_brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(),required=False,allow_null=True,)
     class Meta:
         model = UserPreference
         fields = [
