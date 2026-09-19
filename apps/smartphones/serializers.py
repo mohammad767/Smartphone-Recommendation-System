@@ -4,7 +4,6 @@ from .models import (
     Smartphone,
     SmartphoneSpecification,
     PriceHistory,
-    UserPreference,
 )
 
 
@@ -245,88 +244,6 @@ class PriceHistoryWriteSerializer(serializers.ModelSerializer):
         return value
 
 
-class UserPreferenceReadSerializer(serializers.ModelSerializer):
-    preferred_brand = BrandSerializer()
-
-    class Meta:
-        model = UserPreference
-        fields = [
-            "id",
-            "user",
-            "min_price",
-            "max_price",
-            "camera_weight",
-            "battery_weight",
-            "performance_weight",
-            "display_weight",
-            "preferred_brand",
-            "created_at",
-            "updated_at",
-        ]
-
-
-class UserPreferenceWriteSerializer(serializers.ModelSerializer):
-    preferred_brand = serializers.PrimaryKeyRelatedField(
-        queryset=Brand.objects.all()
-    )
-
-    class Meta:
-        model = UserPreference
-        fields = [
-            "id",
-            "user",
-            "min_price",
-            "max_price",
-            "camera_weight",
-            "battery_weight",
-            "performance_weight",
-            "display_weight",
-            "preferred_brand",
-            "created_at",
-            "updated_at",
-        ]
-        read_only_fields = [
-            "id",
-            "created_at",
-            "updated_at",
-        ]
-
-    def validate(self, attrs):
-        min_price = attrs.get("min_price")
-        max_price = attrs.get("max_price")
-
-        if min_price is not None and max_price is not None:
-            if min_price > max_price:
-                raise serializers.ValidationError(
-                    "Minimum price is bigger than maximum price."
-                )
-
-        if not all(
-            0 <= value <= 100
-            for value in (
-                attrs["camera_weight"],
-                attrs["battery_weight"],
-                attrs["performance_weight"],
-                attrs["display_weight"],
-            )
-        ):
-            raise serializers.ValidationError(
-                "Weight must be between 0 and 100."
-            )
-
-        return attrs
-
-    def validate_user(self, value):
-        if hasattr(value, "preference"):
-            raise serializers.ValidationError(
-                "This user already has a preference."
-            )
-
-        return value
-    
-    
-    
-    
     
 class PhoneSpecificationReadSerializer(serializers.ModelSerializer):
     
@@ -375,77 +292,3 @@ class SmartphoneDetailSerializer(serializers.ModelSerializer):
     
     
     
-class UserPreferenceReadSerializer(serializers.ModelSerializer):
-
-    preferred_brand = BrandSerializer()
-
-    class Meta:
-        model = UserPreference
-        fields = [
-            "user",
-            "min_price",
-            "max_price",
-            "camera_weight",
-            "battery_weight",
-            "performance_weight",
-            "display_weight",
-            "preferred_brand",
-            "created_at",
-            "updated_at",
-        ]
-
-
-class UserPreferenceWriteSerializer(serializers.ModelSerializer):
-    preferred_brand = serializers.PrimaryKeyRelatedField(queryset=Brand.objects.all(),required=False,allow_null=True,)
-    class Meta:
-        model = UserPreference
-        fields = [
-            "min_price",
-            "max_price",
-            "camera_weight",
-            "battery_weight",
-            "performance_weight",
-            "display_weight",
-            "preferred_brand",
-        ]
-
-    def validate_min_price(self, value):
-
-        if value <= 0:
-            raise serializers.ValidationError(
-                "Minimum price must be greater than 0."
-            )
-
-        return value
-
-    def validate_max_price(self, value):
-
-        if value <= 0:
-            raise serializers.ValidationError(
-                "Maximum price must be greater than 0."
-            )
-
-        return value
-
-    def validate(self, attrs):
-
-        min_price = attrs.get(
-            "min_price",
-            getattr(self.instance, "min_price", None)
-        )
-
-        max_price = attrs.get(
-            "max_price",
-            getattr(self.instance, "max_price", None)
-        )
-
-        if (
-            min_price is not None
-            and max_price is not None
-            and min_price > max_price
-        ):
-            raise serializers.ValidationError(
-                "Minimum price cannot be greater than maximum price."
-            )
-
-        return attrs
