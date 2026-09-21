@@ -2,9 +2,9 @@ from django.contrib import admin
 
 from .models import (
     Brand,
+    Chipset,
     Smartphone,
     PriceHistory,
-    SmartphoneSpecification,
 )
 
 
@@ -28,12 +28,34 @@ class BrandAdmin(admin.ModelAdmin):
 
 
 
+@admin.register(Chipset)
+class ChipsetAdmin(admin.ModelAdmin):
+
+    list_display = (
+        "name",
+        "antutu_score",
+        "geekbench_multi",
+    )
+
+    search_fields = (
+        "name",
+    )
+
+    ordering = (
+        "-antutu_score",
+    )
+
+    list_per_page = 20
+
+
+
 @admin.register(Smartphone)
 class SmartphoneAdmin(admin.ModelAdmin):
 
     list_display = (
         "name",
         "brand",
+        "chipset",
         "release_date",
         "created_at",
     )
@@ -41,15 +63,18 @@ class SmartphoneAdmin(admin.ModelAdmin):
     search_fields = (
         "name",
         "brand__name",
+        "chipset__name",
     )
 
     list_filter = (
         "brand",
+        "chipset",
         "release_date",
     )
 
     autocomplete_fields = (
         "brand",
+        "chipset",
     )
 
     ordering = (
@@ -84,34 +109,3 @@ class PriceHistoryAdmin(admin.ModelAdmin):
     ordering = (
         "-created_at",
     )
-
-
-
-@admin.register(SmartphoneSpecification)
-class SmartphoneSpecificationAdmin(admin.ModelAdmin):
-
-    list_display = (
-        "smartphone",
-        "ram",
-        "storage",
-        "battery",
-        "display_type",
-    )
-
-    search_fields = (
-        "smartphone__name",
-        "processor",
-    )
-
-    list_filter = (
-        "display_type",
-        "ram",
-        "storage",
-    )
-
-    autocomplete_fields = (
-        "smartphone",
-    )
-
-
-

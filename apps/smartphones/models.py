@@ -1,7 +1,6 @@
 from django.db import models
 
 
-
 class Brand(models.Model):
 
     name = models.CharField(
@@ -29,21 +28,102 @@ class Brand(models.Model):
 
 
 
+class Chipset(models.Model):
+
+    name = models.CharField(
+        max_length=100,
+        unique=True
+    )
+
+    antutu_score = models.PositiveIntegerField(
+        help_text="AnTuTu v10 benchmark score"
+    )
+
+    geekbench_multi = models.PositiveIntegerField(
+        null=True,
+        blank=True
+    )
+
+
+    class Meta:
+        ordering = ["name"]
+        verbose_name = "Chipset"
+        verbose_name_plural = "Chipsets"
+
+
+    def __str__(self):
+        return self.name
+
+
+
 class Smartphone(models.Model):
 
     name = models.CharField(
         max_length=200
     )
 
-    release_date = models.DateField(
-        null=True,
-        blank=True
-    )
 
     brand = models.ForeignKey(
         Brand,
         on_delete=models.PROTECT,
         related_name="smartphones"
+    )
+
+
+    release_date = models.DateField(
+        null=True,
+        blank=True
+    )
+
+
+    chipset = models.ForeignKey(
+        Chipset,
+        on_delete=models.PROTECT,
+        related_name="smartphones"
+    )
+
+
+    # Performance
+
+    ram_gb = models.PositiveSmallIntegerField()
+
+    storage_gb = models.PositiveIntegerField()
+
+
+    storage_type = models.CharField(
+        max_length=20,
+        choices=[
+            ("emmc", "eMMC"),
+            ("ufs2_2", "UFS 2.2"),
+            ("ufs3_1", "UFS 3.1"),
+            ("ufs4_0", "UFS 4.0"),
+        ]
+    )
+
+
+    # Battery
+
+    battery_mah = models.PositiveIntegerField()
+
+    fast_charging_w = models.PositiveIntegerField(
+        default=0
+    )
+
+
+    # Display
+
+    display_refresh_hz = models.PositiveSmallIntegerField()
+
+    display_ppi = models.PositiveIntegerField()
+
+
+
+    # Camera
+
+    main_camera_mp = models.PositiveIntegerField()
+
+    has_ois = models.BooleanField(
+        default=False
     )
 
 
@@ -57,7 +137,11 @@ class Smartphone(models.Model):
 
 
     class Meta:
-        ordering = ["-release_date"]
+
+        ordering = [
+            "-release_date"
+        ]
+
         verbose_name = "Smartphone"
         verbose_name_plural = "Smartphones"
 
@@ -80,6 +164,7 @@ class PriceHistory(models.Model):
         related_name="price_history"
     )
 
+
     price = models.PositiveBigIntegerField()
 
 
@@ -89,74 +174,24 @@ class PriceHistory(models.Model):
 
 
     class Meta:
-        ordering = ["-created_at"]
+
+        ordering = [
+            "-created_at"
+        ]
+
         verbose_name = "Price History"
         verbose_name_plural = "Price Histories"
 
+
         indexes = [
-            models.Index(fields=["smartphone", "-created_at"]),
+            models.Index(
+                fields=[
+                    "smartphone",
+                    "-created_at"
+                ]
+            ),
         ]
 
 
     def __str__(self):
         return f"{self.smartphone.name} - {self.price}"
-
-
-
-class SmartphoneSpecification(models.Model):
-
-    DISPLAY_TYPE = (
-        ("LCD", "LCD"),
-        ("IPS", "IPS"),
-        ("OLED", "OLED"),
-        ("AMOLED", "AMOLED"),
-    )
-
-
-    smartphone = models.OneToOneField(
-        Smartphone,
-        on_delete=models.CASCADE,
-        related_name="specification"
-    )
-
-
-    ram = models.PositiveIntegerField(
-        help_text="GB"
-    )
-
-    storage = models.PositiveIntegerField(
-        help_text="GB"
-    )
-
-    battery = models.PositiveIntegerField(
-        help_text="mAh"
-    )
-
-    camera = models.PositiveIntegerField(
-        help_text="Megapixel"
-    )
-
-    display_type = models.CharField(
-        max_length=10,
-        choices=DISPLAY_TYPE
-    )
-
-    processor = models.CharField(
-        max_length=100
-    )
-
-    weight = models.PositiveIntegerField(
-        help_text="Gram"
-    )
-
-
-    class Meta:
-        verbose_name = "Smartphone Specification"
-        verbose_name_plural = "Smartphone Specifications"
-
-
-    def __str__(self):
-        return f"{self.smartphone.name} Specification"
-
-
-

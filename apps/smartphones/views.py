@@ -2,10 +2,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework import exceptions
-from .models import Brand,Smartphone,SmartphoneSpecification,PriceHistory
-from .serializers import (BrandSerializer,SmartPhoneReadSerializer,
-                          SmartPhoneWriteSerializer,SmartphoneDetailSerializer,
-                          SpecificationWriteSerializer,SpecificationReadSerializer,
+from .models import Brand,Smartphone,PriceHistory
+from .serializers import (BrandSerializer,SmartphoneReadSerializer,
+                            SmartphoneWriteSerializer,SmartphoneDetailSerializer,
                           PriceHistoryReadSerializer,PriceHistoryWriteSerializer,
                           )
 from rest_framework.generics import get_object_or_404
@@ -56,31 +55,31 @@ class BrandDetailAPIView(APIView) :
         
 class SmartphoneAPIView(APIView) :
     def get(self,request) : 
-        phones = Smartphone.objects.select_related("brand").order_by("created_at")
-        serializer = SmartPhoneReadSerializer(phones,many=True)
+        phones = phones = Smartphone.objects.select_related("brand","chipset")
+        serializer = SmartphoneReadSerializer(phones,many=True)
         return Response({"data" : serializer.data},status=status.HTTP_200_OK)
     
     def post(self,request) : 
-        serializer = SmartPhoneWriteSerializer(data=request.data)
+        serializer = SmartphoneWriteSerializer(data=request.data)
         if serializer.is_valid() :
             phone = serializer.save()
-            read_serializer = SmartPhoneReadSerializer(phone)
+            read_serializer = SmartphoneWriteSerializer(phone)
             return Response({"data" : read_serializer.data},status=status.HTTP_201_CREATED)
         return Response({"errors" : serializer.errors},status.HTTP_400_BAD_REQUEST)
     
 class SmartphoneDetailAPIView(APIView) : 
     def get(self,request,pk) : 
-        phone = get_object_or_404(Smartphone.objects.select_related("brand","specification").prefetch_related("price_history"),pk=pk)
+        phone = get_object_or_404(Smartphone.objects.select_related("brand","chipset").prefetch_related("price_history"),pk=pk)
         
         serializer = SmartphoneDetailSerializer(phone)
         return Response({"data" : serializer.data},status=status.HTTP_200_OK)
     
     def patch(self,request,pk) : 
         phone = get_object_or_404(Smartphone, pk=pk)
-        serializer = SmartPhoneWriteSerializer(phone,data=request.data,partial=True)
+        serializer = SmartphoneWriteSerializer(phone,data=request.data,partial=True)
         if serializer.is_valid() : 
             phone = serializer.save()
-            read_serializer = SmartPhoneReadSerializer(phone)
+            read_serializer = SmartphoneReadSerializer(phone)
             return Response({"data" : read_serializer.data},status=status.HTTP_200_OK)
         
         return Response({"errors" : serializer.errors},status.HTTP_400_BAD_REQUEST)
@@ -90,51 +89,7 @@ class SmartphoneDetailAPIView(APIView) :
         return Response(status=status.HTTP_204_NO_CONTENT)
         
         
-class SpecificationAPIView(APIView):
 
-    def post(self, request, pk):
-
-        smartphone = get_object_or_404(Smartphone,pk=pk)
-
-        data = request.data.copy()
-        data["smartphone"] = smartphone.id
-
-        serializer = SpecificationWriteSerializer(data=data)
-
-        if serializer.is_valid():
-
-            specification = serializer.save()
-
-            read_serializer = SpecificationReadSerializer(specification)
-
-            return Response({"data": read_serializer.data},status=status.HTTP_201_CREATED)
-
-        return Response({"errors": serializer.errors},status=status.HTTP_400_BAD_REQUEST)
-
-
-    def patch(self, request, pk):
-
-        specification = get_object_or_404(SmartphoneSpecification,smartphone_id=pk)
-
-        serializer = SpecificationWriteSerializer(specification,data=request.data,partial=True)
-
-        if serializer.is_valid():
-
-            specification = serializer.save()
-
-            read_serializer = SpecificationReadSerializer(specification)
-
-            return Response({"data": read_serializer.data},status=status.HTTP_200_OK)
-
-        return Response({"errors": serializer.errors},status=status.HTTP_400_BAD_REQUEST)
-    
-    def delete(self, request, pk):
-
-        specification = get_object_or_404(SmartphoneSpecification,smartphone_id=pk)
-
-        specification.delete()
-
-        return Response(status=status.HTTP_204_NO_CONTENT)
     
 
 class PriceHistoryAPIView(APIView) :
