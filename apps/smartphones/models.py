@@ -57,6 +57,16 @@ class Chipset(models.Model):
 
 
 class Smartphone(models.Model):
+    
+
+    DISPLAY_TYPE = (
+        ("OLED","OLED"),
+        ("IPS","IPS",),
+        ("LCD","LCD"),
+        ("AMOLED","AMOLED"),
+        ("S-AMOLED","S-AMOLED")
+        
+    )
 
     name = models.CharField(
         max_length=200
@@ -110,23 +120,38 @@ class Smartphone(models.Model):
     )
 
 
-    # Display
+    
 
     display_refresh_hz = models.PositiveSmallIntegerField()
 
     display_ppi = models.PositiveIntegerField()
+    
+    display_type = models.CharField(max_length=10,choices=DISPLAY_TYPE)
 
 
 
-    # Camera
 
     main_camera_mp = models.PositiveIntegerField()
 
-    has_ois = models.BooleanField(
-        default=False
+
+
+    performance_score = models.FloatField(
+        default=0
     )
 
+    battery_score = models.FloatField(
+        default=0
+    )
 
+    display_score = models.FloatField(
+        default=0
+    )
+
+    camera_score = models.FloatField(
+        default=0
+    )
+    
+    
     created_at = models.DateTimeField(
         auto_now_add=True
     )
@@ -134,6 +159,7 @@ class Smartphone(models.Model):
     updated_at = models.DateTimeField(
         auto_now=True
     )
+    
 
 
     class Meta:
@@ -148,6 +174,10 @@ class Smartphone(models.Model):
         indexes = [
             models.Index(fields=["name"]),
             models.Index(fields=["brand"]),
+            models.Index(fields=["performance_score"]),
+            models.Index(fields=["camera_score"]),
+            models.Index(fields=["display_score"]),
+            models.Index(fields=["battery_score"])
         ]
 
 
@@ -172,6 +202,7 @@ class PriceHistory(models.Model):
         auto_now_add=True
     )
 
+    
 
     class Meta:
 

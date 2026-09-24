@@ -7,6 +7,8 @@ from .serializers import (BrandSerializer,SmartphoneReadSerializer,
                             SmartphoneWriteSerializer,SmartphoneDetailSerializer,
                           PriceHistoryReadSerializer,PriceHistoryWriteSerializer,
                           )
+
+from apps.recommendation.scoring import calculate_and_save_scores
 from rest_framework.generics import get_object_or_404
 
 from rest_framework.permissions import IsAuthenticated
@@ -63,7 +65,8 @@ class SmartphoneAPIView(APIView) :
         serializer = SmartphoneWriteSerializer(data=request.data)
         if serializer.is_valid() :
             phone = serializer.save()
-            read_serializer = SmartphoneWriteSerializer(phone)
+            calculate_and_save_scores(phone)
+            read_serializer = SmartphoneReadSerializer(phone)
             return Response({"data" : read_serializer.data},status=status.HTTP_201_CREATED)
         return Response({"errors" : serializer.errors},status.HTTP_400_BAD_REQUEST)
     
@@ -79,6 +82,7 @@ class SmartphoneDetailAPIView(APIView) :
         serializer = SmartphoneWriteSerializer(phone,data=request.data,partial=True)
         if serializer.is_valid() : 
             phone = serializer.save()
+            calculate_and_save_scores(phone)
             read_serializer = SmartphoneReadSerializer(phone)
             return Response({"data" : read_serializer.data},status=status.HTTP_200_OK)
         
