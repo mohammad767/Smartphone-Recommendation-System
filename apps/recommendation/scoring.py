@@ -7,120 +7,102 @@ STORAGE_SPEED_RANK = {
     "ufs3_1": 3,
     "ufs4_0": 4,
 }
-DISPLAY_TYPE_RANK = {
 
+DISPLAY_TYPE_RANK = {
     "LCD": 1,
     "IPS": 2,
     "OLED": 3,
     "AMOLED": 4,
     "S-AMOLED": 5,
+}
 
+REFERENCE_MAX = {
+    "antutu": 2200000,
+    "ram": 24,
+    "storage_speed": 4,
+    "battery": 6000,
+    "display_type": 5,
+    "charging": 240,
+    "refresh": 165,
+    "ppi": 550,
+    "camera": 200,
 }
 
 
-REFERENCE_MAX = {
+def _scale(value, max_reference):
+    if value is None:
+        return 0
+    return min(100, (value / max_reference) * 100)
 
-    "antutu": 2200000,"ram": 24,"storage_speed": 4,
-    "battery": 6000,"display_type": 5 ,
-    "charging": 240,"refresh": 165,
-    "ppi": 550,"camera": 200
+
+def performance_score(phone):
+    cpu = _scale(phone.chipset.antutu_score, REFERENCE_MAX["antutu"])
+    ram = _scale(phone.ram_gb, REFERENCE_MAX["ram"])
+    storage = _scale(
+        STORAGE_SPEED_RANK.get(phone.storage_type, 1),
+        REFERENCE_MAX["storage_speed"],
+    )
+
+    return round(cpu * 0.6 + ram * 0.25 + storage * 0.15, 2)
+
+
+def battery_score(phone):
+    capacity = _scale(phone.battery_mah, REFERENCE_MAX["battery"])
+    charging = _scale(phone.fast_charging_w, REFERENCE_MAX["charging"])
+
+    return round(capacity * 0.7 + charging * 0.3, 2)
+
+
+def display_score(phone):
+    panel = DISPLAY_TYPE_RANK.get(phone.display_type, 1)
+    panel_score = _scale(panel, REFERENCE_MAX["display_type"])
+    refresh = _scale(phone.display_refresh_hz, REFERENCE_MAX["refresh"])
+    ppi = _scale(phone.display_ppi, REFERENCE_MAX["ppi"])
+
+    return round(refresh * 0.35 + ppi * 0.35 + panel_score * 0.30, 2)
+
+
+def camera_score(phone):
+    megapixel = _scale(phone.main_camera_mp, REFERENCE_MAX["camera"])
+    return round(min(100, megapixel * 0.85), 2)
+
+
+def compute_scores(phone):
+    """Pure function: compute scores without touching the DB."""
+    return {
+        "performance_score": performance_score(phone),
+        "battery_score": battery_score(phone),
+        "display_score": display_score(phone),
+        "camera_score": camera_score(phone),
     }
 
 
-def _scale(value, max_reference):
-
-    if value is None:
-        return 0
-
-
-    return min(100,(value / max_reference) * 100)
-    
-def performance_score(phone):
-
-    cpu = _scale(
-        phone.chipset.antutu_score,
-        REFERENCE_MAX["antutu"]
-    )
-
-
-    ram = _scale(
-        phone.ram_gb,
-        REFERENCE_MAX["ram"]
-    )
-
-
-    storage = _scale(
-    STORAGE_SPEED_RANK.get(phone.storage_type,1),REFERENCE_MAX["storage_speed"])
-
-    return round(
-        cpu * 0.6 +
-        ram * 0.25 +
-        storage * 0.15,
-        2
-    )
-    
-    
-def battery_score(phone) : 
-    
-    capacity = _scale(phone.battery_mah,REFERENCE_MAX["battery"])
-    
-    charging = _scale(phone.fast_charging_w,REFERENCE_MAX["charging"])
-    
-    
-    return round(
-        capacity * 0.7 +
-        charging * 0.3,
-        2
-    )
-    
-def display_score(phone):
-
-    panel = DISPLAY_TYPE_RANK.get(
-        phone.display_type,
-        1
-    )
-
-
-    panel_score = _scale(panel,5)
-
-
-    refresh = _scale(phone.display_refresh_hz,REFERENCE_MAX["refresh"])
-
-
-    ppi = _scale(phone.display_ppi,REFERENCE_MAX["ppi"])
-
-
-    return round(
-        refresh * 0.35 +
-        ppi * 0.35 +
-        panel_score * 0.30,
-        2
-    )
-    
-def camera_score(phone):
-
-    megapixel = _scale(
-        phone.main_camera_mp,
-        REFERENCE_MAX["camera"]
-    )
-
-
-    ois_bonus = 10 if phone.has_ois else 0
-
-
-    return round(min(100,megapixel * 0.85 + ois_bonus),2)
-    
-    
 def calculate_and_save_scores(phone):
-    
-    phone.performance_score = performance_score(phone)
-    phone.battery_score = battery_score(phone)
-    phone.display_score =  display_score(phone)
-    phone.camera_score = camera_score(phone)
-    phone.save()
-    
-    
-    
+    """Single-phone convenience wrapper (signals, admin actions, shell use)."""
+    scores = compute_scores(phone)
+    for field, value in scores.items():
+        setattr(phone, field, value)
+    phone.save(update_fields=list(scores.keys()))
+
+
+def calculate_and_save_scores_bulk(phones):
+    """
+    Efficient bulk path for recalculating many phones at once.
+    Note: bulk_update bypasses save()/signals on Smartphone.
+    """
+    phones = list(phones)
+    for phone in phones:
+        scores = compute_scores(phone)
+        for field, value in scores.items():
+            setattr(phone, field, value)
+
+    Smartphone.objects.bulk_update(
+        phones,
+        ["performance_score", "battery_score", "display_score", "camera_score"],
+        batch_size=500,
+    )
+
+
 def get_phone_scores(phone):
     return {
         "performance": phone.performance_score,

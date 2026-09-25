@@ -101,7 +101,7 @@ class SmartphoneReadSerializer(serializers.ModelSerializer):
             "display_ppi",
 
             "main_camera_mp",
-            "has_ois",
+            
 
             "created_at",
             "updated_at",
@@ -149,8 +149,7 @@ class SmartphoneWriteSerializer(serializers.ModelSerializer):
             "display_ppi",
 
             "main_camera_mp",
-            "has_ois",
-
+            
         ]
 
 
@@ -304,7 +303,7 @@ class SmartphoneDetailSerializer(serializers.ModelSerializer):
             "display_ppi",
 
             "main_camera_mp",
-            "has_ois",
+            
 
             "latest_price",
             "price_history",

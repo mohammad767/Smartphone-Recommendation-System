@@ -11,7 +11,7 @@ from .serializers import (BrandSerializer,SmartphoneReadSerializer,
 from apps.recommendation.scoring import calculate_and_save_scores
 from rest_framework.generics import get_object_or_404
 
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser
 
 
 class BrandAPIView(APIView):
@@ -20,7 +20,8 @@ class BrandAPIView(APIView):
         serializer = BrandSerializer(brands,many=True)
         
         return Response({"data" : serializer.data},status=status.HTTP_200_OK)
-        
+    
+    permission_classes = [IsAdminUser]
     def post(self,request) : 
         serializer = BrandSerializer(data=request.data)
         if serializer.is_valid() :
@@ -35,7 +36,7 @@ class BrandDetailAPIView(APIView) :
         brand = get_object_or_404(Brand, pk=pk)
         serializer = BrandSerializer(brand)
         return Response({"data" : serializer.data},status=status.HTTP_200_OK)
-    
+    permission_classes = [IsAdminUser]
     def patch(self,request,pk) : 
         brand = get_object_or_404(Brand, pk=pk)
         serializer = BrandSerializer(brand,data=request.data,partial=True)
@@ -56,11 +57,12 @@ class BrandDetailAPIView(APIView) :
         
         
 class SmartphoneAPIView(APIView) :
+    
     def get(self,request) : 
         phones = phones = Smartphone.objects.select_related("brand","chipset")
         serializer = SmartphoneReadSerializer(phones,many=True)
         return Response({"data" : serializer.data},status=status.HTTP_200_OK)
-    
+    permission_classes = [IsAdminUser]
     def post(self,request) : 
         serializer = SmartphoneWriteSerializer(data=request.data)
         if serializer.is_valid() :
@@ -76,7 +78,7 @@ class SmartphoneDetailAPIView(APIView) :
         
         serializer = SmartphoneDetailSerializer(phone)
         return Response({"data" : serializer.data},status=status.HTTP_200_OK)
-    
+    permission_classes = [IsAdminUser]
     def patch(self,request,pk) : 
         phone = get_object_or_404(Smartphone, pk=pk)
         serializer = SmartphoneWriteSerializer(phone,data=request.data,partial=True)
@@ -101,7 +103,7 @@ class PriceHistoryAPIView(APIView) :
         prices = PriceHistory.objects.filter(smartphone_id=pk).order_by("-created_at")
         serializer = PriceHistoryReadSerializer(prices,many=True)
         return Response({"data" : serializer.data},status=status.HTTP_200_OK)
-        
+    permission_classes = [IsAdminUser]    
     def post(self,request,pk) :
         data = request.data.copy()
         smartphone = get_object_or_404(Smartphone,pk=pk)
@@ -119,7 +121,7 @@ class PriceHistoryAPIView(APIView) :
     
 
 class PriceHistoryDetailAPIView(APIView):
-
+    permission_classes = [IsAdminUser]
     def delete(self, request, pk):
 
         price = get_object_or_404(

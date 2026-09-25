@@ -43,7 +43,7 @@ class Command(BaseCommand):
                 "ppi": 460,
 
                 "camera": 48,
-                "ois": True,
+                
 
                 "price": 120000000,
             },
@@ -71,7 +71,7 @@ class Command(BaseCommand):
                 "ppi":505,
 
                 "camera":200,
-                "ois":True,
+               
 
                 "price":110000000,
             },
@@ -99,8 +99,7 @@ class Command(BaseCommand):
                 "ppi":520,
 
                 "camera":50,
-                "ois":True,
-
+                
                 "price":70000000,
             },
 
@@ -127,8 +126,7 @@ class Command(BaseCommand):
                 "ppi":495,
 
                 "camera":50,
-                "ois":True,
-
+                
                 "price":90000000,
             },
 
@@ -155,7 +153,7 @@ class Command(BaseCommand):
                 "ppi":510,
 
                 "camera":50,
-                "ois":True,
+                
 
                 "price":65000000,
             },
@@ -203,7 +201,7 @@ class Command(BaseCommand):
                     "display_ppi": item["ppi"],
 
                     "main_camera_mp": item["camera"],
-                    "has_ois": item["ois"],
+                   
 
                 }
             )

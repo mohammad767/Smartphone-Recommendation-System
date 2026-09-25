@@ -1,10 +1,15 @@
 from .scoring import get_phone_scores
 from .price_filter import filter_by_price
 from apps.users.models import UserPreference
+from rest_framework.generics import get_object_or_404
 
 
 def get_recommendations(user):
-    user_preference = UserPreference.objects.get(user=user)
+    user_preference = get_object_or_404(UserPreference, user=user)
+
+    if user_preference.min_price is not None and user_preference.max_price is not None:
+        if user_preference.min_price > user_preference.max_price:
+            return []
 
     camera_weight = user_preference.camera_weight
     battery_weight = user_preference.battery_weight
@@ -12,10 +17,7 @@ def get_recommendations(user):
     display_weight = user_preference.display_weight
 
     total_weight = (
-        camera_weight
-        + battery_weight
-        + performance_weight
-        + display_weight
+        camera_weight + battery_weight + performance_weight + display_weight
     )
 
     if total_weight == 0:
@@ -26,7 +28,6 @@ def get_recommendations(user):
     recommendations = []
 
     for phone in phones:
-
         scores = get_phone_scores(phone)
 
         final_score = (
@@ -44,13 +45,11 @@ def get_recommendations(user):
 
         recommendations.append({
             "smartphone": phone,
+            "latest_price": phone.latest_price,
             "score": round(final_score, 2),
             "breakdown": scores,
         })
 
-    recommendations.sort(
-        key=lambda item: item["score"],
-        reverse=True
-    )
+    recommendations.sort(key=lambda item: item["score"], reverse=True)
 
     return recommendations

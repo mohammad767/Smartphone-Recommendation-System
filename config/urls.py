@@ -23,5 +23,6 @@ urlpatterns = [
     path("api/",include("apps.smartphones.urls")),
     path("auth/",include("apps.accounts.urls")),
     path("user/",include("apps.users.urls")),
+    path("api/recommendations/",include("apps.recommendation.urls"))
     
 ]
