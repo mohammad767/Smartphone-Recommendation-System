@@ -69,7 +69,8 @@ class Smartphone(models.Model):
     )
 
     name = models.CharField(
-        max_length=200
+        max_length=200,
+        unique=True
     )
 
 
@@ -93,7 +94,7 @@ class Smartphone(models.Model):
     )
 
 
-    # Performance
+   
 
     ram_gb = models.PositiveSmallIntegerField()
 
@@ -111,9 +112,9 @@ class Smartphone(models.Model):
     )
 
 
-    # Battery
+    
 
-    battery_mah = models.PositiveIntegerField()
+    battery_mah = models.PositiveIntegerField(default=5000)
 
     fast_charging_w = models.PositiveIntegerField(
         default=0
@@ -150,6 +151,9 @@ class Smartphone(models.Model):
     camera_score = models.FloatField(
         default=0
     )
+    
+    
+    technolife_url = models.URLField(max_length=500,null=True,blank=True)
     
     
     created_at = models.DateTimeField(
